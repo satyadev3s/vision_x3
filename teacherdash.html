@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algoplay — Teacher Dashboard</title>
+
+<style>
+/* -------------------------------------------------
+   THEME 2 — DEEP PURPLE GRADIENT PREMIUM UI
+--------------------------------------------------- */
+:root{
+  --bg-start:#1a103d;
+  --bg-mid:#120b33;
+  --bg-end:#0b0826;
+
+  --card-bg: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.09);
+  --glass: blur(14px);
+
+  --accent-purple:#a78bfa;
+  --accent-blue:#60a5fa;
+  --accent-cyan:#22d3ee;
+  --text-muted:#cbd5e1;
+}
+
+/* -------------------------------------------------
+   BASE LAYOUT
+--------------------------------------------------- */
+body{
+  margin:0;
+  background:linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+  color:white;
+  font-family:"Inter", sans-serif;
+  min-height:100vh;
+}
+
+.container{
+  padding:26px;
+  animation:fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(20px);}
+  to{opacity:1; transform:translateY(0);}
+}
+
+/* -------------------------------------------------
+   HEADER
+--------------------------------------------------- */
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding-bottom:18px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:28px;
+}
+
+.header h1{
+  margin:0;
+  font-size:2.2rem;
+  font-weight:800;
+  background:linear-gradient(90deg, var(--accent-purple), var(--accent-blue));
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.header-meta{
+  margin-top:4px;
+  font-size:.95rem;
+  color:var(--text-muted);
+}
+
+/* Profile Icon */
+.profile-icon{
+  width:52px; height:52px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%;
+  font-size:22px; cursor:pointer;
+  background:linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+  box-shadow:0 10px 25px rgba(0,0,0,0.4);
+  transition:.3s;
+}
+.profile-icon:hover{
+  transform:translateY(-4px) scale(1.07);
+}
+
+/* -------------------------------------------------
+   STATS GRID
+--------------------------------------------------- */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:22px;
+  margin-bottom:28px;
+}
+
+.stat-box{
+  padding:24px;
+  background:var(--card-bg);
+  border-radius:16px;
+  border:1px solid var(--border);
+  backdrop-filter:var(--glass);
+  transition:.3s;
+  box-shadow:0 12px 32px rgba(0,0,0,0.35);
+}
+.stat-box:hover{
+  transform:translateY(-6px);
+}
+
+.stat-box .number{
+  font-size:2.8rem;
+  font-weight:900;
+  background:linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
+  -webkit-background-clip:text;
+  color:transparent;
+}
+.stat-box .label{
+  font-size:1rem;
+  color:var(--text-muted);
+}
+
+/* -------------------------------------------------
+   SECTION CARD
+--------------------------------------------------- */
+.section{
+  padding:24px;
+  margin-bottom:30px;
+  background:var(--card-bg);
+  border-radius:16px;
+  border:1px solid var(--border);
+  backdrop-filter:var(--glass);
+  box-shadow:0 12px 32px rgba(0,0,0,0.35);
+}
+
+.section-title{
+  font-size:1.35rem;
+  margin-bottom:16px;
+  font-weight:800;
+  color:var(--accent-purple);
+}
+
+/* -------------------------------------------------
+   SUBJECT PERFORMANCE BARS
+--------------------------------------------------- */
+.subject-bar-container{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-bottom:16px;
+}
+
+.subject-label{
+  min-width:140px;
+  font-weight:700;
+}
+
+.progress-bar{
+  flex:1;
+  height:30px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.08);
+  overflow:hidden;
+}
+
+.progress-fill{
+  height:100%;
+  border-radius:12px;
+  transition:width .6s ease;
+}
+
+/* Purple theme bar colors */
+.math-fill{ background:linear-gradient(90deg,#7dd3fc,#3b82f6); }
+.science-fill{ background:linear-gradient(90deg,#f472b6,#db2777); }
+.tech-fill{ background:linear-gradient(90deg,#a78bfa,#6d28d9); }
+
+.percentage{
+  width:60px;
+  text-align:right;
+  font-weight:900;
+  color:var(--accent-purple);
+}
+
+/* -------------------------------------------------
+   STUDENT TABLE
+--------------------------------------------------- */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+thead{ background:rgba(255,255,255,0.08); }
+
+th{
+  padding:12px;
+  text-align:left;
+  font-size:.8rem;
+  color:var(--accent-purple);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+td{
+  padding:12px;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+
+tbody tr:hover{
+  background:rgba(255,255,255,0.05);
+}
+
+/* Status Pills */
+.status{
+  padding:6px 12px;
+  border-radius:10px;
+  font-size:.78rem;
+  font-weight:800;
+  color:white;
+}
+
+.excellent{ background:linear-gradient(90deg,#34d399,#059669); }
+.good{ background:linear-gradient(90deg,#60a5fa,#2563eb); }
+.help{ background:linear-gradient(90deg,#f43f5e,#b91c1c); }
+.avg{ background:linear-gradient(90deg,#fbbf24,#b45309); }
+
+/* -------------------------------------------------
+   EXAM + RESOURCES + ANALYSIS BUTTONS
+--------------------------------------------------- */
+.exam-tools-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.tool-button{
+  padding:18px;
+  border:0;
+  border-radius:16px;
+  font-size:1rem;
+  font-weight:900;
+  cursor:pointer;
+  color:white;
+  text-transform:uppercase;
+  transition:.3s;
+  box-shadow:0 12px 28px rgba(0,0,0,0.4);
+}
+
+.tool-button:hover{
+  transform:translateY(-6px);
+}
+
+/* Purple theme buttons */
+.mock-exam-btn{
+  background:linear-gradient(135deg,#f59e0b,#d97706);
+}
+.resources-btn{
+  background:linear-gradient(135deg,#60a5fa,#2563eb);
+}
+.analysis-btn{
+  background:linear-gradient(135deg,#a78bfa,#6d28d9);
+}
+
+/* -------------------------------------------------
+   QUICK ACTIONS
+--------------------------------------------------- */
+.action-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:18px;
+}
+
+.action-button,
+.manage-assignments{
+  padding:16px;
+  border:0;
+  border-radius:14px;
+  font-size:1rem;
+  font-weight:900;
+  cursor:pointer;
+  text-transform:uppercase;
+  transition:.3s;
+  color:white;
+  box-shadow:0 12px 28px rgba(0,0,0,0.4);
+}
+
+.reports-button{
+  background:linear-gradient(135deg,#fbbf24,#f59e0b);
+}
+.send-update-button{
+  
+  background:linear-gradient(135deg,#34d399,#059669);
+}
+.manage-assignments{
+  width:100%;
+  background:linear-gradient(135deg,#60a5fa,#2563eb);
+}
+
+.action-button:hover,
+.manage-assignments:hover{
+  transform:translateY(-6px);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <h1>Algoplay — Teacher Dashboard</h1>
+      <p class="header-meta">Class 6–10 Performance Overview</p>
+    </div>
+    <div class="profile-icon" onclick="use()">👤</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-box">
+      <span class="number">79</span>
+      <span class="label">Total Students</span>
+    </div>
+    <div class="stat-box">
+      <span class="number">62</span>
+      <span class="label">Active Today</span>
+    </div>
+  </div>
+
+  <!-- SUBJECT PERFORMANCE -->
+  <div class="section">
+    <div class="section-title">Subject Performance</div>
+
+    <div class="subject-bar-container">
+      <div class="subject-label">Mathematics</div>
+      <div class="progress-bar"><div class="progress-fill math-fill" style="width:74%"></div></div>
+      <div class="percentage">74%</div>
+    </div>
+
+    <div class="subject-bar-container">
+      <div class="subject-label">Science</div>
+      <div class="progress-bar"><div class="progress-fill science-fill" style="width:45%"></div></div>
+      <div class="percentage">45%</div>
+    </div>
+
+    <div class="subject-bar-container">
+      <div class="subject-label">Technology</div>
+      <div class="progress-bar"><div class="progress-fill tech-fill" style="width:96%"></div></div>
+      <div class="percentage">96%</div>
+    </div>
+  </div>
+
+  <!-- STUDENT PROGRESS -->
+  <div class="section">
+    <div class="section-title">Student Progress</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Grade</th>
+          <th>Progress</th>
+          <th>Hours</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr><td>Alex</td><td>8th</td><td>85%</td><td>4.5h</td><td><span class="status excellent">Excellent</span></td></tr>
+        <tr><td>Maya</td><td>7th</td><td>72%</td><td>3.2h</td><td><span class="status good">Good</span></td></tr>
+        <tr><td>Chris</td><td>7th</td><td>91%</td><td>5.1h</td><td><span class="status excellent">Excellent</span></td></tr>
+        <tr><td>Sarah</td><td>6th</td><td>58%</td><td>1.8h</td><td><span class="status help">Needs Help</span></td></tr>
+        <tr><td>David</td><td>7th</td><td>76%</td><td>3.8h</td><td><span class="status good">Good</span></td></tr>
+        <tr><td>Emily</td><td>8th</td><td>45%</td><td>1.9h</td><td><span class="status avg">Average</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- EXAM & TOOLS -->
+  <div class="section">
+    <div class="section-title">Exam & Learning Tools</div>
+
+    <div class="exam-tools-grid">
+      <button class="tool-button mock-exam-btn" onclick="mockexam()">📝 Mock Exams</button>
+      <button class="tool-button resources-btn" onclick="gotoresources()">📚 Resources</button>
+      <button class="tool-button analysis-btn" onclick="analysis()">📊 Analysis</button>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="section">
+    <div class="section-title">Quick Actions</div>
+
+    <div class="action-buttons">
+      <button class="action-button reports-button" onclick="detailedreports()">📋view deatiled Reports</button>
+     <button class="manage-assignments" onclick="manageassignments()">Manage Assignments</button>
+    </div>
+
+  
+  </div>
+
+</div>
+<script>
+    function analysis(){
+        window.location.href = "analysis.html";
+    }
+    function manageassignments(){
+        window.location.href = "questiongeneration.html";
+    }
+    function gotoresources(){
+        window.location.href = "resources.html";
+    }
+    function detailedreports(){
+        window.location.href = "leaderboard.html";
+    }
+    function mockexam(){
+        window.location.href = "examconduct.html";
+    }
+    function use(){
+        window.location.href = "teacherprofile.html";
+    }
+</script>
+</body>
+</html>

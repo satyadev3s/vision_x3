@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AlgoPlay — Learn by Playing</title>
+  <meta name="description" content="AlgoPlay is a gamified learning platform for coding. Level up with bite‑size challenges, XP, badges, and leaderboards." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+
+    .box-clicked {
+  transform: scale(0.9);
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
+  box-shadow: 0 0 25px rgba(99,102,241,0.7);
+  transition: all 0.2s ease;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+
+
+    :root{
+      --bg: #0b1020;
+      --card: rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.08);
+      --ring: rgba(59,130,246,.4);
+    }
+    .bg-main{background: radial-gradient(1200px 600px at 10% 10%, rgba(59,130,246,.25), transparent 40%),radial-gradient(1000px 700px at 90% 20%, rgba(168,85,247,.25), transparent 40%),linear-gradient(180deg, #0b1020, #0b1020);}    
+    .text-gradient{background:linear-gradient(90deg,#60a5fa,#a78bfa,#34d399);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .glass{background:var(--glass);backdrop-filter: blur(10px);border:1px solid rgba(255,255,255,.12)}
+    .glass-strong{background:var(--card);backdrop-filter: blur(14px);border:1px solid rgba(255,255,255,.18)}
+    .glow{box-shadow:0 0 0 1px rgba(255,255,255,.06), 0 8px 30px rgba(99,102,241,.25)}
+    .glow-green{box-shadow:0 0 0 1px rgba(16,185,129,.18), 0 10px 40px rgba(16,185,129,.25)}
+    .floating{animation:float 6s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;border-radius:.6rem;padding:.9rem 1.25rem;font-weight:600}
+  </style>
+</head>
+<body class="min-h-screen text-white bg-[#0b1020]">
+  <!-- Background effects -->
+  <div class="fixed inset-0 -z-10">
+    <div class="absolute inset-0 bg-main"></div>
+    <canvas id="stars" class="absolute inset-0"></canvas>
+  </div>
+
+  <!-- NAV -->
+  <header class="relative z-10">
+    <nav class="mx-auto max-w-7xl px-4 py-5 flex items-center justify-between">
+      <a href="#" class="text-xl font-extrabold tracking-tight">Algo<span class="text-gradient">Play</span></a>
+      <div class="hidden md:flex items-center gap-6 text-sm text-gray-300">
+        <a href="#features" class="hover:text-white">Features</a>
+        <a href="#tracks" class="hover:text-white">Subjects</a>
+        <a href="#how" class="hover:text-white">How it works</a>
+        <a href="#pricing" class="hover:text-white">Pricing</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/signuppage.html" class="btn glass border border-white/20 text-gray-100 hover:bg-white/10">Sign in</a>
+        <a href="/Loginpage.html" class="btn bg-white text-black hover:bg-gray-100 glow">Get started</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative z-10 px-4">
+    <div class="mx-auto max-w-5xl text-center py-20 md:py-28 space-y-8">
+      <div class="inline-flex items-center px-4 py-2 rounded-full glass-strong text-sm text-gray-200 border border-blue-400/30 glow">
+        🎮 Now in Beta — Gamified Learning
+      </div>
+      <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
+        Game to learn,<br class="hidden md:block" />
+        <span class="text-gradient">One Playable Level at a Time</span>
+      </h1>
+      <p class="text-lg md:text-2xl text-gray-300 max-w-2xl mx-auto">
+       Structured tracks, short assessments, and immediate feedback—designed for measurable skill growth.
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a href="/Loginpage.html" class="btn bg-white text-black hover:bg-gray-100 glow">Start Learning</a>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
+        <div class="glass p-6 text-center rounded-lg floating">
+          <div class="text-2xl md:text-3xl font-bold"><span class="counter" data-target="1850">0</span>+</div>
+          <div class="text-sm text-gray-400">Learners</div>
+        </div>
+        <div class="glass p-6 text-center rounded-lg floating" style="animation-delay:.2s">
+          <div class="text-2xl md:text-3xl font-bold"><span class="counter" data-target="9240">0</span>+</div>
+          <div class="text-sm text-gray-400">Challenges Solved</div>
+        </div>
+        <div class="glass p-6 text-center rounded-lg floating" style="animation-delay:.4s">
+          <div class="text-2xl md:text-3xl font-bold"><span class="counter" data-target="32000">0</span>+</div>
+          <div class="text-sm text-gray-400">XP Earned</div>
+        </div>
+        <div class="glass p-6 text-center rounded-lg floating" style="animation-delay:.6s">
+          <div class="text-2xl md:text-3xl font-bold">98.7%</div>
+          <div class="text-sm text-gray-400">Satisfaction</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="relative z-10 py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-4xl md:text-5xl font-bold text-gradient">Why it works</h2>
+        <p class="text-xl text-gray-300 mt-3">Game mechanics that make learning addictive—in a good way.</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass-strong p-7 rounded-xl hover:glow transition">
+          <div class="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center mb-5">🎯</div>
+          <h3 class="font-semibold text-white mb-2">Bite‑size Levels</h3>
+          <p class="text-gray-300">5–10 min missions with focused concepts.</p>
+        </div>
+        <div class="glass-strong p-7 rounded-xl hover:glow transition">
+          <div class="w-12 h-12 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center mb-5">🏆</div>
+          <h3 class="font-semibold text-white mb-2">XP, Badges, Streaks</h3>
+          <p class="text-gray-300">Earn XP, unlock avatars, and maintain a streak that boosts your daily XP multiplier.</p>
+        </div>
+        <div class="glass-strong p-7 rounded-xl hover:glow transition">
+          <div class="w-12 h-12 rounded-lg bg-gradient-to-r from-fuchsia-500 to-pink-500 flex items-center justify-center mb-5">⚡</div>
+          <h3 class="font-semibold text-white mb-2">Instant Feedback</h3>
+          <p class="text-gray-300">Auto‑grading with hints. See failing test cases and learn by fixing.</p>
+        </div>
+        <div class="glass-strong p-7 rounded-xl hover:glow transition">
+          <div class="w-12 h-12 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center mb-5">📈</div>
+          <h3 class="font-semibold text-white mb-2">Leaderboards</h3>
+          <p class="text-gray-300">Compete with classmates or friends. Weekly seasons keep it fresh.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="relative z-10 py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-4xl md:text-5xl font-bold text-gradient">How AlgoPlay Works</h2>
+        <p class="text-xl text-gray-300 mt-3">Four steps to turn study time into play time.</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass-strong p-8 rounded-xl hover:glow transition floating">
+          <h3 class="text-xl font-semibold mb-2">1. Pick a Track</h3>
+          <p class="text-gray-300">Choose DSA, Web Dev, Python, or SQL. We recommend a difficulty to start.</p>
+        </div>
+        <div class="glass-strong p-8 rounded-xl hover:glow transition floating" style="animation-delay:.15s">
+          <h3 class="text-xl font-semibold mb-2">2. Play Levels</h3>
+          <p class="text-gray-300">Solve bite‑size problems with live code runner and tests.</p>
+        </div>
+        <div class="glass-strong p-8 rounded-xl hover:glow transition floating" style="animation-delay:.3s">
+          <h3 class="text-xl font-semibold mb-2">3. Earn & Unlock</h3>
+          <p class="text-gray-300">Get XP, badges, and items to customize your profile.</p>
+        </div>
+        <div class="glass-strong p-8 rounded-xl hover:glow transition floating" style="animation-delay:.45s">
+          <h3 class="text-xl font-semibold mb-2">4. Grow a Streak</h3>
+          <p class="text-gray-300">Daily goals, reminders, and season leaderboards keep you consistent.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRENDING TRACKS -->
+  <section id="tracks" class="relative z-10 py-20 px-4">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-4xl md:text-5xl font-bold text-gradient">Trending Tracks</h2>
+        <p class="text-xl text-gray-300">What learners are playing this week</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <article class="glass-strong p-6 rounded-xl hover:glow-green transition cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 grid place-items-center font-bold">Mat</div>
+              <div>
+                <h3 class="font-semibold">Mathematics</h3>
+                <p class="text-sm text-gray-400">solving problems</p>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Hot</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-300">
+            <p>Avg. level time: 7 min</p>
+            <p>XP: 50–200</p>
+          </div>
+        </article>
+        <article class="glass-strong p-6 rounded-xl hover:glow-green transition cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 grid place-items-center font-bold">Tech</div>
+              <div>
+                <h3 class="font-semibold">Technology</h3>
+                <p class="text-sm text-gray-400">HTML • CSS • JS</p>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Hot</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-300">
+            <p>Avg. level time: 5 min</p>
+            <p>XP: 40–150</p>
+          </div>
+        </article>
+        <article class="glass-strong p-6 rounded-xl hover:glow-green transition cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-pink-500 to-fuchsia-500 grid place-items-center font-bold">Bio</div>
+              <div>
+                <h3 class="font-semibold">Biology</h3>
+                <p class="text-sm text-gray-400">lear from basics</p>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Hot</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-300">
+            <p>Avg. level time: 6 min</p>
+            <p>XP: 40–160</p>
+          </div>
+        </article>
+        <article class="glass-strong p-6 rounded-xl hover:glow-green transition cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-amber-400 to-orange-500 grid place-items-center font-bold">Eng</div>
+              <div>
+                <h3 class="font-semibold">English</h3>
+                <p class="text-sm text-gray-400">Easy to learn</p>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">New</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-300">
+            <p>Avg. level time: 5 min</p>
+            <p>XP: 30–140</p>
+          </div>
+        </article>
+        <article class="glass-strong p-6 rounded-xl hover:glow-green transition cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 grid place-items-center font-bold">Sci</div>
+              <div>
+                <h3 class="font-semibold">Science</h3>
+                <p class="text-sm text-gray-400">Time & Space Mastery</p>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">New</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-300">
+            <p>Avg. level time: 10 min</p>
+            <p>XP: 80–300</p>
+          </div>
+        </article>
+        <article class="glass-strong p-6 rounded-xl hover:glow-green transition cursor-pointer">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-cyan-500 grid place-items-center font-bold">AI</div>
+              <div>
+                <h3 class="font-semibold">AI Basics</h3>
+                <p class="text-sm text-gray-400">Prompts • Vectors • APIs</p>
+              </div>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Beta</span>
+          </div>
+          <div class="flex items-center justify-between text-gray-300">
+            <p>Avg. level time: 6 min</p>
+            <p>XP: 50–170</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="relative z-10 py-20 px-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-14">
+        <h2 class="text-4xl md:text-5xl font-bold text-gradient">Loved by learners</h2>
+        <p class="text-xl text-gray-300">Real stories from the AlgoPlay community</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6">
+        <figure class="glass-strong p-8 rounded-xl floating">
+          <blockquote class="text-gray-200">“Daily streaks kept me consistent. I finally passed my DSA round.”</blockquote>
+          <figcaption class="mt-6 flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Sara K.</p>
+              <p class="text-sm text-gray-400">Placed @ FinTech</p>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">41 levels</span>
+          </figcaption>
+        </figure>
+        <figure class="glass-strong p-8 rounded-xl floating" style="animation-delay:.2s">
+          <blockquote class="text-gray-200">“The hint system is 👌. I learn more fixing my own bugs.”</blockquote>
+          <figcaption class="mt-6 flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Rohit M.</p>
+              <p class="text-sm text-gray-400">2nd year, CSE</p>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">73 levels</span>
+          </figcaption>
+        </figure>
+        <figure class="glass-strong p-8 rounded-xl floating" style="animation-delay:.4s">
+          <blockquote class="text-gray-200">“Leaderboards made my class labs fun again.”</blockquote>
+          <figcaption class="mt-6 flex items-center justify-between">
+            <div>
+              <p class="font-semibold">Anita J.</p>
+              <p class="text-sm text-gray-400">Instructor</p>
+            </div>
+            <span class="text-xs px-2 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">12 cohorts</span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="pricing" class="relative z-10 py-20 px-4">
+    <div class="max-w-5xl mx-auto text-center">
+      <div class="glass-strong rounded-2xl p-12 glow">
+        <h2 class="text-4xl md:text-5xl font-bold text-gradient mb-4">Ready to Start Playing?</h2>
+        <p class="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">Join the beta free. Educator plans with class dashboards available.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="loginpage.html" class="btn bg-white text-black hover:bg-gray-100 glow">Get Started</a>
+         
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 py-12 px-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-8">
+      <div>
+        <h3 class="text-xl font-bold text-gradient mb-3">AlgoPlay</h3>
+        <p class="text-gray-400 text-sm">Gamified coding practice that makes concepts stick.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-3">Platform</h4>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="#how" class="hover:text-white">How it works</a></li>
+          <li><a href="#features" class="hover:text-white">Features</a></li>
+          <li><a href="#tracks" class="hover:text-white">Tracks</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-3">Support</h4>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="#" class="hover:text-white">Help Center</a></li>
+          <li><a href="#" class="hover:text-white">Community</a></li>
+          <li><a href="#" class="hover:text-white">Status</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-3">Legal</h4>
+        <ul class="space-y-2 text-sm text-gray-400">
+          <li><a href="#" class="hover:text-white">Privacy</a></li>
+          <li><a href="#" class="hover:text-white">Terms</a></li>
+          <li><a href="#" class="hover:text-white">Cookies</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-white/10 mt-8 pt-8 text-center text-sm text-gray-400">© 2025 AlgoPlay. All rights reserved.</div>
+  </footer>
+
+  <!-- Modal -->
+  <div id="demoModal" class="fixed inset-0 hidden items-center justify-center bg-black/70 p-4 z-50">
+    <div class="bg-[#0e1430] border border-white/15 rounded-2xl max-w-3xl w-full overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <h3 class="font-semibold">AlgoPlay — Demo</h3>
+        <button id="closeDemo" class="px-3 py-1 rounded-md bg-white/10 hover:bg-white/20">✕</button>
+      </div>
+      <div class="aspect-video bg-black">
+        <!-- Replace with your demo video URL or iframe -->
+        <iframe class="w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Demo" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Minimal starfield background
+    const canvas = document.getElementById('stars');
+    const ctx = canvas.getContext('2d');
+    let w, h, stars;
+    function resize(){ w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; stars = Array.from({length: Math.min(200, Math.floor(w*h/15000))}, () => ({ x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.6+0.2, a: Math.random()*0.5+0.2 })); }
+    function draw(){ ctx.clearRect(0,0,w,h); for(const s of stars){ ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle = rgba(255,255,255,${s.a}); ctx.fill(); } requestAnimationFrame(draw); }
+    window.addEventListener('resize', resize); resize(); draw();
+
+    // Counter animation
+    const counters = document.querySelectorAll('.counter');
+    const easeOut = t => 1 - Math.pow(1 - t, 4);
+    function animateCounter(el){ const target = +el.dataset.target; const dur = 1400; const start = performance.now(); function step(now){ const p = Math.min(1, (now - start)/dur); const val = Math.floor(target * easeOut(p)); el.textContent = val.toLocaleString(); if(p < 1) requestAnimationFrame(step); } requestAnimationFrame(step); }
+    const io = new IntersectionObserver((entries)=>{ entries.forEach(e=>{ if(e.isIntersecting){ animateCounter(e.target); io.unobserve(e.target); } }) }, {threshold:.6}); counters.forEach(c=>io.observe(c));
+
+    // Demo modal
+    const modal = document.getElementById('demoModal');
+    document.getElementById('closeDemo').addEventListener('click', ()=> modal.classList.add('hidden'));
+ 
+
+    // Click animation for boxes
+document.querySelectorAll('.glass, .glass-strong').forEach(box => {
+  box.addEventListener('click', () => {
+    box.classList.add('box-clicked');
+    box.style.animation = 'blink 0.4s ease 2';
+    setTimeout(() => {
+      box.classList.remove('box-clicked');
+      box.style.animation = '';
+    }, 600); // reset after animation
+  });
+});
+
+ 
+ 
+ 
+ </script>
+</body>
+</html>

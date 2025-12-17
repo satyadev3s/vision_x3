@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>AlgoPlay — Level 2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{--bg1:#0d47a1;--bg2:#0b79c2;--accent:#ffeb3b}
+  *{box-sizing:border-box;font-family:Arial}
+  html,body{height:100%;margin:0;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:#fff}
+  .wrap{display:flex;flex-direction:column;height:100vh}
+  .header{padding:18px;background:#c62828;font-weight:900}
+  .prog{height:6px;background:rgba(255,255,255,.12)}
+  .fill{height:100%;background:linear-gradient(90deg,var(--accent),#fbc02d);width:0}
+  .content{padding:22px;flex:1;overflow:auto}
+  .q{font-size:1.6rem;margin-bottom:12px}
+  .btn{display:block;width:100%;padding:14px;border-radius:10px;border:0;margin:10px 0;background:#b0bec5;color:#111;font-weight:800;cursor:pointer}
+  .correct{background:#4caf50;color:#fff}
+  .incorrect{background:#f44336;color:#fff}
+  .footer{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(0,0,0,.14)}
+  .next{background:#1976d2;padding:10px 18px;border-radius:8px;border:0;color:#fff;font-weight:900;display:none}
+  .next.show{display:inline-block}
+  .back{background:#33691e;padding:10px 18px;border-radius:8px;border:0;color:#fff;font-weight:900}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">Level 2 — Arithmetic</div>
+  <div class="prog"><div id="fill" class="fill"></div></div>
+  <div class="content">
+    <div class="q" id="question">Question</div>
+    <button class="btn" onclick="answer(this,'a')" data-c="a">a</button>
+    <button class="btn" onclick="answer(this,'b')" data-c="b">b</button>
+    <button class="btn" onclick="answer(this,'c')" data-c="c">c</button>
+    <button class="btn" onclick="answer(this,'d')" data-c="d">d</button>
+  </div>
+  <div class="footer">
+    <div>Score: <span id="score">0</span>/<span id="total">4</span></div>
+    <div>
+      <button class="back" onclick="goBack()">← Back</button>
+      <button id="nextBtn" class="next" onclick="nextQ()">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {n:1,text:"What is 7 × 8?", opts:{a:"48", b:"54", c:"56", d:"64"}, correct:"c"},
+  {n:2,text:"12 ÷ 3 = ?", opts:{a:"3", b:"4", c:"6", d:"9"}, correct:"b"},
+  {n:3,text:"If x + 5 = 12, x = ?", opts:{a:"6", b:"7", c:"8", d:"5"}, correct:"b"},
+  {n:4,text:"9^0 = ?", opts:{a:"0", b:"1", c:"9", d:"undefined"}, correct:"b"}
+];
+
+let idx=0, score=0, answered=false;
+document.getElementById('total').textContent = QUESTIONS.length;
+loadQ();
+
+function loadQ(){
+  if(idx>=QUESTIONS.length){ complete(); return; }
+  const q = QUESTIONS[idx];
+  document.getElementById('question').textContent = q.text;
+  const btns = document.querySelectorAll('.btn');
+  ['a','b','c','d'].forEach((k,i)=>{
+    btns[i].textContent = `${k}) ${q.opts[k]}`;
+    btns[i].disabled=false;
+    btns[i].classList.remove('correct','incorrect');
+    btns[i].style.opacity='1';
+    btns[i].dataset.choice = k;
+  });
+  document.getElementById('fill').style.width = (idx/QUESTIONS.length)*100 + '%';
+  document.getElementById('nextBtn').classList.remove('show');
+  answered=false;
+}
+
+function answer(btn, choice){
+  if(answered) return;
+  answered=true;
+  const q = QUESTIONS[idx];
+  const btns = document.querySelectorAll('.btn');
+  btns.forEach(b=>b.disabled=true);
+
+  if(choice === q.correct){
+    btn.classList.add('correct');
+    score++;
+    document.getElementById('score').textContent = score;
+  } else {
+    btn.classList.add('incorrect');
+    const cb = Array.from(btns).find(b=>b.dataset.choice === q.correct);
+    if(cb) cb.classList.add('correct');
+  }
+
+  btns.forEach(b=>{
+    if(!b.classList.contains('correct') && !b.classList.contains('incorrect')){
+      b.style.opacity = 0.6;
+    }
+  });
+
+  setTimeout(()=>document.getElementById('nextBtn').classList.add('show'), 600);
+}
+
+function nextQ(){ idx++; loadQ(); }
+
+function complete(){
+  const total = QUESTIONS.length;
+  const accuracy = (score/total)*100;
+  const xp = Math.floor(score*20 + accuracy/3 + 30); // XP formula for level 2
+  alert(`Level 2 Complete!\nXP: ${xp}\nAccuracy: ${accuracy.toFixed(1)}%`);
+  sendLevel(2, xp, accuracy.toFixed(1));
+  sessionStorage.setItem('level2_completed','true');
+  window.location.href='matlevel.html'; // change to next page if you want
+}
+
+async function sendLevel(level,xp,accuracy){
+  const sid = sessionStorage.getItem('student_id');
+  if(!sid){ console.warn('student_id missing'); return; }
+  const payload = {
+    student_id: parseInt(sid),
+    level,
+    xp,
+    accuracy: parseFloat(accuracy),
+    timestamp:new Date().toISOString()
+  };
+  try{
+    const r = await fetch('http://localhost:5000/levelupdate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+    console.log('levelupdate', await r.json());
+  }catch(e){
+    console.error('levelupdate error', e);
+  }
+}
+
+function goBack(){ if(confirm('Exit?')) window.location.href='matlevel.html'; }
+</script>
+</body>
+</html>

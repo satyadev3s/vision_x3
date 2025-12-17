@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Science — Level 6</title>
+<style>body,html{height:100%;margin:0;font-family:Segoe UI}#app{height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);color:#fff}.header{padding:20px;background:linear-gradient(90deg,#0f2027,#203a43);display:flex;justify-content:space-between;align-items:center;font-weight:900}.progress{height:6px;background:rgba(255,255,255,.18)}.progress-fill{height:100%;width:25%;transition:width .35s;background:#7c4dff}.content{padding:22px;flex:1;overflow:auto}.qtext{font-size:1.6rem;font-weight:900;margin-bottom:18px}.btn{display:block;width:100%;padding:14px;margin-bottom:12px;border-radius:12px;border:none;background:linear-gradient(135deg,#fff,#e6e6e6);color:#111;font-weight:800;cursor:pointer}.btn:disabled{opacity:.95}.correct{background:#27ae60;color:#fff}.incorrect{background:#e74c3c;color:#fff}.footer{display:flex;justify-content:space-between;padding:16px}.small{padding:10px 14px;border-radius:10px;border:none;color:#fff;font-weight:900}.back{background:linear-gradient(135deg,#558B2F,#33691e)}.next{background:linear-gradient(135deg,#1976D2,#1565C0);display:none}.next.show{display:inline-block}</style></head><body>
+<div id="app">
+  <div class="header"><div id="qnum">🔬 1. Question</div><div>⏳ <span id="timer">30</span>s</div></div>
+  <div class="progress"><div id="progress-fill" class="progress-fill"></div></div>
+  <div class="content"><div id="qtext" class="qtext">Loading...</div>
+    <button class="btn" data-answer="a" onclick="select(this,'a')"></button>
+    <button class="btn" data-answer="b" onclick="select(this,'b')"></button>
+    <button class="btn" data-answer="c" onclick="select(this,'c')"></button>
+    <button class="btn" data-answer="d" onclick="select(this,'d')"></button>
+  </div>
+  <div class="footer"><div>Score: <strong id="score">0</strong>/<span id="total">4</span></div><div style="display:flex;gap:8px;align-items:center"><button id="back" class="small back" onclick="goBack()" disabled>← Back</button><button id="next" class="small next" onclick="goNext()">Next →</button></div></div>
+</div>
+
+<script>
+const TIME_PER_Q=30, LEVEL=6;
+const questions=[
+ {number:1,text:"What do red blood cells carry?",answers:[{l:'a',t:'Oxygen'},{l:'b',t:'Hormones'},{l:'c',t:'Antibodies'},{l:'d',t:'Enzymes'}],correct:'a',user:null,remaining:TIME_PER_Q},
+ {number:2,text:"Which organ pumps blood?",answers:[{l:'a',t:'Lungs'},{l:'b',t:'Kidney'},{l:'c',t:'Heart'},{l:'d',t:'Liver'}],correct:'c',user:null,remaining:TIME_PER_Q},
+ {number:3,text:"Which system controls hormones?",answers:[{l:'a',t:'Nervous'},{l:'b',t:'Endocrine'},{l:'c',t:'Digestive'},{l:'d',t:'Respiratory'}],correct:'b',user:null,remaining:TIME_PER_Q},
+ {number:4,text:"Which part filters blood in kidney?",answers:[{l:'a',t:'Nephron'},{l:'b',t:'Alveoli'},{l:'c',t:'Neuron'},{l:'d',t:'Villus'}],correct:'a',user:null,remaining:TIME_PER_Q}
+];
+let state={idx:0,intv:null};
+const DOM={qtext:document.getElementById('qtext'),qnum:document.getElementById('qnum'),buttons:document.querySelectorAll('.btn'),score:document.getElementById('score'),total:document.getElementById('total'),next:document.getElementById('next'),back:document.getElementById('back'),timer:document.getElementById('timer'),progress:document.getElementById('progress-fill')};
+function render(){ const q=questions[state.idx]; DOM.qnum.textContent=`🔬 ${q.number}. Question`; DOM.qtext.textContent=q.text; DOM.total.textContent=questions.length; DOM.score.textContent=questions.filter(x=>x.user===x.correct).length; DOM.progress.style.width = (((state.idx+1)/questions.length)*100)+'%'; DOM.buttons.forEach((b,i)=>{ const a=q.answers[i]; b.textContent=`${a.l}) ${a.t}`; b.dataset.answer=a.l; b.classList.remove('correct','incorrect'); b.disabled = q.user!==null; b.style.opacity='1'; if(q.user!==null){ if(a.l===q.correct) b.classList.add('correct'); else if(a.l===q.user) b.classList.add('incorrect'); else b.style.opacity='0.5'; } }); DOM.next.classList[q.user!==null?'add':'remove']('show'); DOM.back.disabled = state.idx===0; DOM.timer.textContent=q.remaining; startTimer(); }
+function startTimer(){ stopTimer(); const q=questions[state.idx]; if(q.remaining<=0){ onTimeUp(); return;} DOM.timer.textContent=q.remaining; state.intv=setInterval(()=>{ q.remaining--; DOM.timer.textContent=q.remaining; if(q.remaining<=0){ stopTimer(); onTimeUp(); } },1000); }
+function stopTimer(){ if(state.intv){ clearInterval(state.intv); state.intv=null; } }
+function onTimeUp(){ const q=questions[state.idx]; if(q.user===null) q.user='timeout'; DOM.buttons.forEach(b=>b.disabled=true); const cb=[...DOM.buttons].find(b=>b.dataset.answer===q.correct); if(cb) cb.classList.add('correct'); setTimeout(()=> advanceOrFinish(),700); }
+function select(btn,choice){ const q=questions[state.idx]; if(q.user!==null) return; stopTimer(); q.user=choice; DOM.buttons.forEach(b=>b.disabled=true); if(choice===q.correct) btn.classList.add('correct'); else { btn.classList.add('incorrect'); const cb=[...DOM.buttons].find(b=>b.dataset.answer===q.correct); if(cb) cb.classList.add('correct'); } DOM.score.textContent=questions.filter(x=>x.user===x.correct).length; setTimeout(()=> DOM.next.classList.add('show'),400); }
+function goNext(){ stopTimer(); if(state.idx<questions.length-1){ state.idx++; render(); } else finish(); }
+function goBack(){ stopTimer(); if(state.idx===0) return; state.idx--; render(); }
+function advanceOrFinish(){ if(state.idx<questions.length-1){ state.idx++; render(); } else finish(); }
+function finish(){ stopTimer(); const s=questions.filter(x=>x.user===x.correct).length; const t=questions.length; const pct=(s/t)*100; const msg=pct>=75?'🎉 Excellent!':pct>=50?'👍 Good!':'📚 Keep Learning!'; alert(`${msg}\n\nLevel ${LEVEL} Completed!\nFinal Score: ${s}/${t}\n${pct.toFixed(1)}%`); sessionStorage.setItem(`level${LEVEL}_completed`,'true'); sessionStorage.setItem('completedLevel', LEVEL); location.href='scilevel.html'; }
+document.addEventListener('DOMContentLoaded',()=>{ render(); });
+</script></body></html>

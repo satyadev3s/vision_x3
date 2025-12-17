@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Quiz – Level 1</title>
+
+<style>
+/* ---- SAME UI STYLES ---- */
+body,html{margin:0;padding:0;height:100%;font-family:'Segoe UI',Roboto,Arial,sans-serif;box-sizing:border-box}
+#app-container{width:100%;height:100vh;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(135deg,#1e3c72,#2a5298,#7e8ba3);color:#fff}
+.header{background:linear-gradient(90deg,#e74c3c,#c0392b);padding:22px 20px;font-size:1.6rem;font-weight:900;display:flex;justify-content:space-between;align-items:center}
+.progress-bar{width:100%;height:6px;background:rgba(255,255,255,.25)}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2ecc71,#27ae60);transition:width .4s}
+.question-section{flex:1;padding:26px;overflow-y:auto margin-bottom:20px;}
+.question-text{font-size:2rem;font-weight:900;margin-bottom:22px}
+.answer-button{  width:350px; display:block; margin-bottom:20px;padding:16px 20px;margin-bottom:16px;border:none;border-radius:12px;font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,#b0bec5,#90a4ae);color:#111;cursor:pointer;transition:.25s;box-shadow:0 8px 16px rgba(0,0,0,.18) }
+.answer-button:hover:not(:disabled){transform:translateY(-5px)}
+.answer-button:disabled{opacity:.9;cursor:not-allowed}
+.correct{background:linear-gradient(135deg,#27ae60,#229954)!important;color:#fff!important}
+.incorrect{background:linear-gradient(135deg,#e74c3c,#c0392b)!important;color:#fff!important}
+.footer{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.15);padding:16px}
+.back-button,.next-button{padding:12px 26px;border:none;border-radius:10px;font-weight:900;color:#fff;cursor:pointer}
+.back-button{background:linear-gradient(135deg,#558B2F,#33691e)}
+.next-button{background:linear-gradient(135deg,#1976D2,#1565C0);display:none}
+.next-button.show{display:block}
+</style>
+</head>
+
+<body>
+
+<div id="app-container">
+
+    <div class="header">
+        <span id="question-number">🔬 1. Question</span>
+        <span>⏳ <span id="timer">30</span>s</span>
+    </div>
+
+    <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+
+    <div class="question-section">
+        <div id="question-text" class="question-text"></div>
+
+        <button class="answer-button" onclick="checkAnswer(this,'a')"></button>
+        <button class="answer-button" onclick="checkAnswer(this,'b')"></button>
+        <button class="answer-button" onclick="checkAnswer(this,'c')"></button>
+        <button class="answer-button" onclick="checkAnswer(this,'d')"></button>
+    </div>
+
+    <div class="footer">
+        <div class="score-text">Score: <span id="score">0</span>/4</div>
+        <div style="display:flex;gap:10px">
+            <button id="back-button" class="back-button" onclick="goBack()" disabled>← Back</button>
+            <button id="next-button" class="next-button" onclick="nextQuestion()">Next →</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const TIME_PER_QUESTION = 30;
+const LEVEL = 1;
+
+const questions = [
+  { number:1, text:"What is the process by which plants make their own food?", answers:{a:"Respiration",b:"Photosynthesis",c:"Digestion",d:"Fermentation"}, correct:"b", user:null, remaining:TIME_PER_QUESTION },
+  { number:2, text:"What is the smallest unit of life?", answers:{a:"Atom",b:"Molecule",c:"Cell",d:"Tissue"}, correct:"c", user:null, remaining:TIME_PER_QUESTION },
+  { number:3, text:"What is the chemical formula for water?", answers:{a:"H₂O",b:"CO₂",c:"O₂",d:"N₂"}, correct:"a", user:null, remaining:TIME_PER_QUESTION },
+  { number:4, text:"What is the speed of light?", answers:{a:"300,000 km/s",b:"150,000 km/s",c:"450,000 km/s",d:"100,000 km/s"}, correct:"a", user:null, remaining:TIME_PER_QUESTION }
+];
+
+let index = 0;
+let timerInterval = null;
+
+/* -------------- DOM ---------------- */
+const qText = document.getElementById("question-text");
+const qNum = document.getElementById("question-number");
+const buttons = document.querySelectorAll(".answer-button");
+const scoreSpan = document.getElementById("score");
+const timerSpan = document.getElementById("timer");
+const nextBtn = document.getElementById("next-button");
+const backBtn = document.getElementById("back-button");
+const progress = document.getElementById("progress-fill");
+
+/* -------------- RENDER ---------------- */
+function render() {
+    const q = questions[index];
+
+    qNum.textContent = `🔬 ${q.number}. Question`;
+    qText.textContent = q.text;
+    scoreSpan.textContent = questions.filter(q=>q.user===q.correct).length;
+    progress.style.width = ((index+1)/questions.length)*100 + "%";
+
+    buttons.forEach((btn,i)=>{
+        const key = ["a","b","c","d"][i];
+        btn.textContent = `${key}) ${q.answers[key]}`;
+        btn.dataset.answer = key;
+        btn.classList.remove("correct","incorrect");
+        btn.style.opacity = "1";
+        btn.disabled = q.user !== null;
+
+        if(q.user !== null){
+            if(key === q.correct) btn.classList.add("correct");
+            else if(key === q.user) btn.classList.add("incorrect");
+            else btn.style.opacity = ".5";
+        }
+    });
+
+    nextBtn.classList[q.user ? "add" : "remove"]("show");
+    backBtn.disabled = index === 0;
+
+    timerSpan.textContent = q.remaining;
+    startTimer();
+}
+
+/* -------------- TIMER ---------------- */
+function startTimer(){
+    stopTimer();
+    const q = questions[index];
+
+    timerSpan.textContent = q.remaining;
+
+    timerInterval = setInterval(()=>{
+        q.remaining--;
+        timerSpan.textContent = q.remaining;
+
+        if(q.remaining <= 0){
+            stopTimer();
+            handleTimeout();
+        }
+    },1000);
+}
+
+function stopTimer(){ clearInterval(timerInterval); }
+
+/* -------------- ANSWER SELECT ---------------- */
+function checkAnswer(btn, choice){
+    const q = questions[index];
+    if(q.user) return;
+
+    stopTimer();
+
+    q.user = choice;
+
+    buttons.forEach(b=>b.disabled = true);
+
+    if(choice === q.correct) btn.classList.add("correct");
+    else {
+        btn.classList.add("incorrect");
+        const correctBtn = [...buttons].find(b=>b.dataset.answer===q.correct);
+        correctBtn.classList.add("correct");
+    }
+
+    scoreSpan.textContent = questions.filter(q=>q.user===q.correct).length;
+
+    setTimeout(()=> nextBtn.classList.add("show"), 400);
+}
+
+/* -------------- TIMEOUT ---------------- */
+function handleTimeout(){
+    const q = questions[index];
+    if(!q.user) q.user = "timeout";
+
+    buttons.forEach(b=>b.disabled = true);
+
+    const correctBtn = [...buttons].find(b=>b.dataset.answer===q.correct);
+    correctBtn.classList.add("correct");
+
+    setTimeout(()=> nextQuestion(), 600);
+}
+
+/* -------------- NAVIGATION ---------------- */
+function nextQuestion(){
+    stopTimer();
+
+    if(index < questions.length-1){
+        index++;
+        render();
+    } else finishQuiz();
+}
+
+function goBack(){
+    stopTimer();
+    if(index > 0){
+        index--;
+        render();
+    }
+}
+
+/* -------------- COMPLETION ---------------- */
+function finishQuiz(){
+    stopTimer();
+
+    const s = questions.filter(q=>q.user===q.correct).length;
+    const pct = (s/questions.length)*100;
+    const msg = pct>=75 ? "🎉 Excellent!" : pct>=50 ? "👍 Good!" : "📚 Keep Learning!";
+
+    alert(`${msg}\n\nLevel ${LEVEL} Completed!\nScore: ${s}/4`);
+
+    sessionStorage.setItem("completedLevel", LEVEL);
+
+    window.location.href = "drinkwaterscience.html";
+}
+
+/* Init */
+render();
+</script>
+
+</body>
+</html>

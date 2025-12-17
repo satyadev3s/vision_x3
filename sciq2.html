@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Science Quiz – Level 2</title>
+
+<style>
+/* SAME UI AS SCIQ1 */
+body,html{margin:0;padding:0;height:100%;font-family:'Segoe UI',Roboto,Arial}
+#app{height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,#1e3c72,#2a5298,#7e8ba3);color:#fff}
+
+.header{background:linear-gradient(90deg,#e74c3c,#c0392b);padding:22px 20px;font-size:1.6rem;font-weight:900;display:flex;justify-content:space-between}
+.progress-bar{height:6px;background:rgba(255,255,255,.25)}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2ecc71,#27ae60);transition:width .4s}
+
+.content{padding:26px;flex:1;overflow-y:auto}
+.question-text{font-size:2rem;font-weight:900;margin-bottom:22px}
+
+.answer-button{padding:16px;margin-bottom:12px;width:100%;border:none;border-radius:12px;background:linear-gradient(135deg,#b0bec5,#90a4ae);color:#111;font-size:1.2rem;font-weight:800;cursor:pointer;transition:.25s;box-shadow:0 8px 16px rgba(0,0,0,.18)}
+.answer-button:hover:not(:disabled){transform:translateY(-5px)}
+.answer-button:disabled{opacity:.85}
+
+.correct{background:linear-gradient(135deg,#27ae60,#229954)!important;color:#fff!important}
+.incorrect{background:linear-gradient(135deg,#e74c3c,#c0392b)!important;color:#fff!important}
+
+.footer{padding:16px;background:rgba(0,0,0,.15);display:flex;justify-content:space-between}
+.back-button,.next-button{padding:12px 26px;border:none;border-radius:10px;font-weight:900;color:white;cursor:pointer}
+.back-button{background:linear-gradient(135deg,#558B2F,#33691e)}
+.next-button{background:linear-gradient(135deg,#1976D2,#1565C0);display:none}
+.next-button.show{display:block}
+</style>
+</head>
+
+<body>
+<div id="app">
+    <div class="header">
+        <span id="qnum"></span>
+        <span>⏳ <span id="timer">30</span>s</span>
+    </div>
+
+    <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+
+    <div class="content">
+        <div id="qtext" class="question-text"></div>
+
+        <button class="answer-button" onclick="choose(this,'a')"></button>
+        <button class="answer-button" onclick="choose(this,'b')"></button>
+        <button class="answer-button" onclick="choose(this,'c')"></button>
+        <button class="answer-button" onclick="choose(this,'d')"></button>
+    </div>
+
+    <div class="footer">
+        <div>Score: <span id="score">0</span>/4</div>
+        <div style="display:flex;gap:10px">
+            <button id="back" class="back-button" onclick="back()" disabled>← Back</button>
+            <button id="next" class="next-button" onclick="nextQ()">Next →</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const LEVEL = 2;
+const TIME = 30;
+
+/* ---- LEVEL 2 QUESTIONS ---- */
+const Q = [
+ {
+  number:1,
+  text:"Which gas do humans need to breathe to survive?",
+  answers:{a:"Nitrogen",b:"Oxygen",c:"Carbon dioxide",d:"Helium"},
+  correct:"b", user:null, remaining:TIME
+ },
+ {
+  number:2,
+  text:"What is the largest organ in the human body?",
+  answers:{a:"Heart",b:"Liver",c:"Skin",d:"Kidney"},
+  correct:"c", user:null, remaining:TIME
+ },
+ {
+  number:3,
+  text:"What force pulls objects toward Earth?",
+  answers:{a:"Electric force",b:"Gravity",c:"Magnetism",d:"Friction"},
+  correct:"b", user:null, remaining:TIME
+ },
+ {
+  number:4,
+  text:"Water freezes at which temperature?",
+  answers:{a:"0°C",b:"10°C",c:"20°C",d:"100°C"},
+  correct:"a", user:null, remaining:TIME
+ }
+];
+
+let index = 0;
+let timer = null;
+
+const qnum = document.getElementById("qnum");
+const qtext = document.getElementById("qtext");
+const buttons = document.querySelectorAll(".answer-button");
+const timerBox = document.getElementById("timer");
+const scoreBox = document.getElementById("score");
+const nextBtn = document.getElementById("next");
+const backBtn = document.getElementById("back");
+const progress = document.getElementById("progress");
+
+function render(){
+ const q = Q[index];
+
+ qnum.textContent = `🔬 ${q.number}. Question`;
+ qtext.textContent = q.text;
+ scoreBox.textContent = Q.filter(x=>x.user===x.correct).length;
+ progress.style.width = ((index+1)/Q.length)*100 + "%";
+
+ buttons.forEach((btn,i)=>{
+   const key = ["a","b","c","d"][i];
+   btn.textContent = `${key}) ${q.answers[key]}`;
+   btn.dataset.key = key;
+   btn.disabled = q.user !== null;
+   btn.classList.remove("correct","incorrect");
+   btn.style.opacity = "1";
+
+   if(q.user){
+     if(key === q.correct) btn.classList.add("correct");
+     else if(key === q.user) btn.classList.add("incorrect");
+     else btn.style.opacity=".5";
+   }
+ });
+
+ nextBtn.classList[q.user?"add":"remove"]("show");
+ backBtn.disabled = index===0;
+
+ timerBox.textContent = q.remaining;
+ startTimer();
+}
+
+function startTimer(){
+ stopTimer();
+ const q = Q[index];
+
+ timer = setInterval(()=>{
+   q.remaining--;
+   timerBox.textContent = q.remaining;
+
+   if(q.remaining<=0){
+     stopTimer();
+     timeout();
+   }
+ },1000);
+}
+
+function stopTimer(){
+ if(timer){ clearInterval(timer); timer=null; }
+}
+
+function choose(btn,key){
+ const q = Q[index];
+ if(q.user) return;
+
+ stopTimer();
+ q.user = key;
+
+ buttons.forEach(b=>b.disabled=true);
+
+ if(key===q.correct) btn.classList.add("correct");
+ else{
+   btn.classList.add("incorrect");
+   const c = [...buttons].find(b=>b.dataset.key===q.correct);
+   c.classList.add("correct");
+ }
+
+ scoreBox.textContent = Q.filter(x=>x.user===x.correct).length;
+ setTimeout(()=> nextBtn.classList.add("show"),400);
+}
+
+function timeout(){
+ const q = Q[index];
+
+ if(!q.user) q.user="timeout";
+
+ buttons.forEach(b=>b.disabled=true);
+ const c=[...buttons].find(b=>b.dataset.key===q.correct);
+ c.classList.add("correct");
+
+ setTimeout(()=> nextQ(),600);
+}
+
+function nextQ(){
+ stopTimer();
+ if(index < Q.length-1){ index++; render(); }
+ else finish();
+}
+
+function back(){
+ stopTimer();
+ if(index>0){ index--; render(); }
+}
+
+function finish(){
+ stopTimer();
+ const s = Q.filter(x=>x.user===x.correct).length;
+ alert(`Level ${LEVEL} Completed!\nScore: ${s}/4`);
+
+ sessionStorage.setItem("completedLevel", LEVEL);
+ location.href="breathescience.html";
+}
+
+render();
+</script>
+</body>
+</html>

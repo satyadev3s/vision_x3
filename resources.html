@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Assignment Upload</title>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #0b0f19;
+        font-family: "Inter", sans-serif;
+        color: #e2e8f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        animation: fadeIn 1s ease forwards;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 35px;
+        width: 420px;
+        border-radius: 18px;
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 30px rgba(0, 150, 255, 0.25);
+        transform: translateY(30px);
+        animation: slideUp 0.9s ease forwards;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        background: linear-gradient(to right, #06b6d4, #3b82f6, #9333ea);
+        -webkit-background-clip: text;
+        color: transparent;
+        font-size: 26px;
+        font-weight: 600;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 16px;
+        opacity: 0.9;
+    }
+
+    select, input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        outline: none;
+        background: #1e293b;
+        color: #e2e8f0;
+        margin-bottom: 20px;
+        transition: 0.3s;
+    }
+
+    select:hover, input[type="file"]:hover {
+        background: #334155;
+    }
+
+    input[type="file"]::-webkit-file-upload-button {
+        background: linear-gradient(to right, #3b82f6, #06b6d4);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 17px;
+        font-weight: 600;
+        background: linear-gradient(to right, #3b82f6, #06b6d4);
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.4);
+    }
+
+    button:hover:not(:disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 0 18px rgba(6,182,212,0.7);
+    }
+
+    button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .status {
+        margin-top: 15px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 500;
+        display: none;
+    }
+
+    .status.success {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status.error {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(40px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h2>Upload Resources</h2>
+
+    <label>Select Subject</label>
+    <select id="subject">
+        <option value="">Choose a subject</option>
+        <option value="english">English</option>
+        <option value="biology">Biology</option>
+        <option value="mathematics">Mathematics</option>
+        <option value="technology">Technology</option>
+        <option value="science">Science</option>
+    </select>
+
+    <label>Upload Document</label>
+    <input type="file" id="fileUpload" accept="image/*,.pdf,.doc,.docx">
+
+    <button id="assignBtn" onclick="assignWork()">Assign</button>
+
+    <div id="status" class="status"></div>
+</div>
+
+<script>
+async function assignWork() {
+    const subject = document.getElementById("subject").value;
+    const fileInput = document.getElementById("fileUpload");
+    const file = fileInput.files[0];
+    const btn = document.getElementById("assignBtn");
+    const status = document.getElementById("status");
+
+    // Reset status
+    status.className = "status";
+    status.style.display = "none";
+
+    // Validation
+    if (!subject) {
+        showStatus("Please select a subject.", "error");
+        return;
+    }
+    if (!file) {
+        showStatus("Please upload a document.", "error");
+        return;
+    }
+
+    // Loading state
+    btn.disabled = true;
+    btn.textContent = "Uploading...";
+
+    try {
+        // const teacherName = sessionStorage.getItem("logged_in_name");
+
+        // Get teacher info from sessionStorage
+        const teacherName = sessionStorage.getItem("logged_in_name");
+        const teacherId = sessionStorage.getItem("logged_in_id");
+        
+        if (!teacherId) {
+            showStatus("Please login first.", "error");
+            return;
+        }
+
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append("subject", subject);
+        formData.append("assignment_file", file);
+        formData.append("teacher_id", teacherId);
+        formData.append("teacher_name", teacherName || "Teacher");
+
+       fetch("http://localhost:5000/assignments")
+  .then(res => res.json())
+  .then(data => {
+    const list = document.getElementById("assignmentList");
+    list.innerHTML = "";
+
+    if (data.length === 0) {
+        list.innerHTML = "<p>No assignments posted yet.</p>";
+        return;
+    }
+
+    data.forEach(task => {
+        list.innerHTML += `
+          <div style="background: rgba(255,255,255,0.1);
+                      padding: 15px;
+                      border-radius: 12px;
+                      border-left: 5px solid #6366f1;">
+            <h4>${task.subject}</h4>
+            <p style="font-size: 13px;">By ${task.teacher_name}</p>
+            <p style="font-size: 11px; opacity: 0.7;">${task.date}</p>
+            <a href="${task.url}" target="_blank"
+               style="color:#22d3ee;font-size:13px;">
+               📄 View / Download
+            </a>
+          </div>
+        `;
+    });
+  });
+
+        
+
+function showStatus(message, type) {
+    const status = document.getElementById("status");
+    status.textContent = message;
+    status.className = `status ${type}`;
+    status.style.display = "block";
+    
+    // Auto-hide success after 3s
+    if (type === "success") {
+        setTimeout(() => {
+            status.style.display = "none";
+        }, 3000);
+    }
+}
+
+// Drag & drop file support
+const fileInput = document.getElementById("fileUpload");
+const dropZone = document.querySelector(".container");
+
+["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+["dragenter", "dragover"].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+["dragleave", "drop"].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    dropZone.style.background = "rgba(59, 130, 246, 0.1)";
+    dropZone.style.border = "2px dashed #3b82f6";
+}
+
+function unhighlight(e) {
+    dropZone.style.background = "rgba(255, 255, 255, 0.05)";
+    dropZone.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+}
+
+dropZone.addEventListener("drop", handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0) {
+        fileInput.files = files;
+        showStatus(`${files[0].name} ready to upload`, "success");
+    }
+}
+</script>
+</body>
+</html>

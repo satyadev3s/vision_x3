@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%}
+
+body{
+    font-family:Poppins,sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:url("https://tse1.mm.bing.net/th/id/OIP.USJ-O_3Ew8s5_RIFjDjCxQHaHa?pid=Api&P=0&h=220") no-repeat center/cover;
+    color:#fff;
+}
+
+.wrapper{
+    width:420px;
+    padding:40px;
+    border-radius:20px;
+    background:rgba(7,6,24,.9);
+    box-shadow:0 0 40px rgba(99,102,241,.6);
+}
+
+h2{text-align:center;margin-bottom:6px}
+p{text-align:center;font-size:13px;opacity:.8}
+
+.input-group{
+    margin-top:25px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.input-field label{
+    font-size:11px;
+    opacity:.7;
+}
+
+.input-field input{
+    width:100%;
+    padding:11px;
+    border-radius:9px;
+    border:1px solid rgba(141,162,255,.6);
+    background:rgba(18,24,40,.9);
+    color:#fff;
+    outline:none;
+}
+
+.input-field input:focus{
+    border-color:#7dd3fc;
+    box-shadow:0 0 0 1px rgba(56,189,248,.7);
+}
+
+.btn{
+    width:100%;
+    margin-top:25px;
+    padding:12px;
+    border:none;
+    border-radius:999px;
+    background:linear-gradient(135deg,#22d3ee,#6366f1,#ec4899);
+    color:#fff;
+    font-size:14px;
+    cursor:pointer;
+}
+
+.btn:hover{transform:translateY(-2px)}
+
+.signin{
+    margin-top:18px;
+    text-align:center;
+    font-size:12px;
+}
+
+.signin button{
+    margin-left:6px;
+    padding:6px 14px;
+    border-radius:999px;
+    border:1px solid #818cf8;
+    background:transparent;
+    color:#fff;
+    cursor:pointer;
+}
+#teacherpos,#teacherpo{
+    border:2px solid tomato;
+    margin-top:15px;
+    padding:10px;
+    color:white;
+    margin-left:10px;
+    cursor:pointer;
+    background:transparent;
+    border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+    <h2>Create Account</h2>
+    <p>Join Algoplay and start learning 🚀</p>
+
+    <div class="input-group">
+        <div class="input-field">
+            <label>Username</label>
+            <input id="name" type="text" placeholder="Enter username">
+        </div>
+
+        <div class="input-field">
+            <label>School Name</label>
+            <input id="schoolname" type="text" placeholder="Enter school name">
+        </div>
+
+        <div class="input-field">
+            <label>Age</label>
+            <input id="age" type="number" placeholder="Enter age">
+        </div>
+
+        <div class="input-field">
+            <label>Class of Study</label>
+            <input id="classofstudy" type="text" placeholder="Eg: 10th / 1st Year">
+        </div>
+
+        <div class="input-field">
+            <label>Password</label>
+            <input id="password" type="password" placeholder="Create password">
+        </div>
+    </div>
+
+    <button class="btn" id="signupBtn">Create Account</button>
+
+    <div class="signin">
+        Already have an account?
+        <button onclick="location.href='loginpage.html'">Login</button>
+    </div>
+    <button class="" id="teacherpos">
+        Are you a teacher?
+        <button onclick="hh()"id="teacherpo">Sign up here</button>
+    </button>
+</div>
+
+<script>
+    function hh(){
+        location.href='teachersignup.html';
+    }
+document.getElementById("signupBtn").addEventListener("click", () => {
+
+    const name = document.getElementById("name").value.trim();
+    const age = document.getElementById("age").value.trim();
+    const schoolname = document.getElementById("schoolname").value.trim();
+    const classofstudy = document.getElementById("classofstudy").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if(!name || !age || !schoolname || !classofstudy || !password){
+        alert("Please fill all fields");
+        return;
+    }
+
+    fetch("http://localhost:5000/Signup",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            name,
+            age,
+            schoolname,
+            classofstudy,
+            password,
+            score:0,
+            leaderboard:0
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.error){
+            alert(data.error);
+            return;
+        }
+        alert("Signup successful 🎉");
+        window.location.href="Loginpage.html";
+    })
+    .catch(()=>{
+        alert("Backend not running");
+    });
+});
+</script>
+
+</body>
+</html>
